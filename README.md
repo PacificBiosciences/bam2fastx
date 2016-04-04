@@ -45,4 +45,4 @@ Both tools have an identical interface and take BAM and/or DataSet files as inpu
 
 ## HELP
 
-        Futher help can be requested with `-h`. Issues? Problem? Please create a github issue.
+Futher help can be requested with `-h`. Issues? Problem? Please create a github issue.
