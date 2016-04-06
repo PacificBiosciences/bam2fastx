@@ -38,7 +38,7 @@
 #include <cassert>
 #include <string>
 
-#include "cpp-optparse/OptionParser.h"
+#include "OptionParser.h"
 #include "pacbio/gzfile/GZFileWriters.h"
 
 #include "pbbam/BamFile.h"

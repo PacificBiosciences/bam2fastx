@@ -41,12 +41,15 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -pthread")
 ################
 
 #  OPTIONPARSER
-add_library(OPTIONPARSER_LIB STATIC
-    ${BAM2FASTX_ThirdPartyDir}/cpp-optparse/OptionParser.h
-    ${BAM2FASTX_ThirdPartyDir}/cpp-optparse/OptionParser.cpp
-)
-target_include_directories(OPTIONPARSER_LIB PUBLIC ${BAM2FASTX_ThirdPartyDir})
+if (NOT CPP_OPTPARSE_ROOT)
+  set(CPP_OPTPARSE_ROOT ${BAM2FASTX_ThirdPartyDir}/cpp-optparse)
+endif()
 
+add_library(OPTIONPARSER_LIB STATIC
+    ${CPP_OPTPARSE_ROOT}/OptionParser.h
+    ${CPP_OPTPARSE_ROOT}/OptionParser.cpp
+)
+target_include_directories(OPTIONPARSER_LIB PUBLIC ${CPP_OPTPARSE_ROOT})
 
 #  COMMON INTERFACE
 add_library(COMMON_INTERFACE INTERFACE)
