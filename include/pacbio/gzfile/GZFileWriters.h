@@ -149,8 +149,8 @@ private:
                    {
                        const std::string barcodeString =
                        {
-                          std::to_string(barcodes.first) + "_" +
-                          std::to_string(barcodes.second)
+                          "." + std::to_string(barcodes.first) + 
+                          "_" + std::to_string(barcodes.second)
                        };
                        const std::string outFn = outputPrefix + barcodeString + outputSuffix;
                        barcodeWriterLookup_.emplace(barcodes, GZFileWriterPtr{new GZFileWriter(outFn, mode)});
