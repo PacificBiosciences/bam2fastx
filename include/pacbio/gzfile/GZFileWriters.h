@@ -93,7 +93,14 @@ public:
         // splitting records on barcode values
         if (isSplittingBarcodes_)
         {
-            auto iter = barcodeWriterLookup_.find(b.Barcodes());
+            BarcodePair barcodes;
+            if (b.HasBarcodes)
+                barcodes = b.Barcodes();
+            else
+                barcodes = std::make_pair(static_cast<uint16_t>(-1),
+                                          static_cast<uint16_t>(-1));
+
+            auto iter = barcodeWriterLookup_.find(barcodes);
             if (iter != barcodeWriterLookup_.cend())
                 return iter->second.get();
             else
