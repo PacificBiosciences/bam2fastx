@@ -94,7 +94,7 @@ public:
         if (isSplittingBarcodes_)
         {
             BarcodePair barcodes;
-            if (b.HasBarcodes)
+            if (b.HasBarcodes())
                 barcodes = b.Barcodes();
             else
                 barcodes = std::make_pair(static_cast<uint16_t>(-1),
