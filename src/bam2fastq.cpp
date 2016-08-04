@@ -39,7 +39,7 @@
 #include <string>
 
 #include "OptionParser.h"
-#include "pacbio/gzfile/GZFileWriters.h"
+#include "pacbio/io/FileWriters.h"
 
 #include "pbbam/BamFile.h"
 #include "pbbam/BamRecord.h"
@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
 
     auto groupOpt = optparse::OptionGroup(parser, "Optional parameters");
     groupOpt.add_option("-c").dest("compression").metavar("INT").help("Gzip compression level [1-9]");
+    groupOpt.add_option("-u").dest("uncompressed").action("store_true").help("Do not compress. In this case, we will not add .gz, and we ignore any -c setting.");
     // groupOpt.add_option("-q").dest("qual").action("store_true").help("Use QUAL field as qualities (Default: IQV)");
     groupOpt.add_option("--split-barcodes").dest("split_barcodes").action("store_true")
             .help("Split output into multiple FASTQ files, by barcode pairs. ");
@@ -97,15 +98,24 @@ int main(int argc, char* argv[])
 
     // bool insertQV = !options.get("qual");
 
-    // setup open mode string
-    std::string mode = "wb";
-    mode += options["compression"].empty() ? "1" : options["compression"];
+    std::unique_ptr<PacBio::Postprimary::AbstractWriterFactory> fact;
+    std::string suffix;
 
+    if (options.get("uncompressed")) {
+        fact.reset(new PacBio::Postprimary::PlainFileWriterFactory);
+        suffix = ".fasta";
+    } else {
+        // setup open mode string
+        std::string mode = "wb";
+        mode += options["compression"].empty() ? "1" : options["compression"];
+        fact.reset(new PacBio::Postprimary::GZFileWriterFactory(mode));
+        suffix = ".fasta.gz";
+    }
     // setup output files
-    PacBio::Postprimary::GZFileWriters writers(args,
-                                               mode,
+    PacBio::Postprimary::AbstractWriters writers(*fact,
+                                               args,
                                                options["output"],
-                                               ".fastq.gz",
+                                               suffix,
                                                options.is_set("split_barcodes"));
     // for each input file
     for (const auto& input : args)

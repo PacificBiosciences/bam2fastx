@@ -33,38 +33,37 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// Programmer: Derek Barnett
-
 #pragma once
 
 #include <stdexcept>
 #include <string>
+#include <cstdio>
 
-#include "zlib.h"
+#include "AbstractWriter.h"
 
 namespace PacBio {
 namespace Postprimary {
 
-// simple RAII wrapper for writing gzFiles
-class GZFileWriter
+// simple RAII wrapper for writing plain files
+class PlainFileWriter : public AbstractWriter
 {
 public:
-    GZFileWriter(const std::string& filename,
-                 const std::string& mode)
-        : f_(gzopen(filename.c_str(), mode.c_str()))
+    PlainFileWriter(const std::string& filename,
+                    const std::string& mode)
+        : f_(fopen(filename.c_str(), mode.c_str()))
     {
         if (!f_)
-            throw std::runtime_error("Error opening file: " + filename + " for writing");
+            throw std::runtime_error("Error opening plain file: '" + filename + "' for writing");
     }
 
-    ~GZFileWriter(void)
-    { gzclose(f_); }
+    ~PlainFileWriter(void) override
+    { fclose(f_); }
 
-    int Write(const char* buffer, unsigned len)
-    { return gzwrite(f_, buffer, len); }
+    int Write(const char* buffer, unsigned len) override
+    { return std::fwrite(buffer, 1U, len, f_); }
 
 private:
-    gzFile f_;
+    FILE* f_;
 };
 
 }} // ::PacBio::Postprimary

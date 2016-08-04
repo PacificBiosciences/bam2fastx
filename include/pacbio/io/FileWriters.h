@@ -46,18 +46,49 @@
 #include "pbbam/BamRecord.h"
 #include "pbbam/DataSet.h"
 #include "pbbam/PbiRawData.h"
-#include "pacbio/gzfile/GZFileWriter.h"
+#include "AbstractWriter.h"
+#include "GZFileWriter.h"
+#include "PlainFileWriter.h"
 
 namespace PacBio {
 namespace Postprimary {
 
-// wrapper around single or multiple GZFileWriters (when splitting by barcode)
-class GZFileWriters
+// injectable factory to decouple the choice of Writer from the
+// FileWriters class (which is responsible only for maintaining
+// the Writers, which can vary per Record)
+class AbstractWriterFactory {
+public:
+    virtual AbstractWriter* newAbstractWriter(std::string const& fn) const
+    {return nullptr;}
+    virtual ~AbstractWriterFactory()
+    {}
+};
+
+class GZFileWriterFactory : public AbstractWriterFactory {
+public:
+    /// \param[in] mode         output mode (e.g. "wb"+compressionLevel)
+    explicit GZFileWriterFactory(std::string const& mode)
+        : mode_(mode)
+    {}
+    AbstractWriter* newAbstractWriter(std::string const& fn) const override
+    {return new GZFileWriter(fn, mode_);}
+private:
+    std::string const mode_;
+};
+
+class PlainFileWriterFactory : public AbstractWriterFactory {
+public:
+    AbstractWriter* newAbstractWriter(std::string const& fn) const override
+    {return new PlainFileWriter(fn, "wb");}
+};
+
+// wrapper around single or multiple AbstractWriters (when splitting by barcode)
+class AbstractWriters
 {
 public:
-    /// Constructs a lookup structure of one or more GZFileWriters.
+    /// Constructs a lookup structure of one or more AbstractWriters.
     ///
-    /// When not splitting by barcodes, this will create a single GZFileWriter
+    /// When not splitting by barcodes, this will create a single AbstractWriter
     /// operating on <outputPrefix>.<outputSuffix>.
     ///
     /// For the barcode splitting mode, the filenames will be something like:
@@ -66,29 +97,30 @@ public:
     /// toward this writer.
     ///
     /// \param[in] filenames    input filenames (BAM, DataSetXML)
-    /// \param[in] mode         output mode (e.g. "wb"+compressionLevel)
     /// \param[in] outputPrefix filename prefix
     /// \param[in] outputSuffix filename suffix, beginning with dot (e.g. ".fastq.gz" or ".fasta.gz")
     ///
-    GZFileWriters(const std::vector<std::string>& filenames,
-                  const std::string& mode,
+    AbstractWriters(
+                  AbstractWriterFactory const& fact,
+                  const std::vector<std::string>& filenames,
                   const std::string& outputPrefix,
                   const std::string& outputSuffix,
                   const bool isSplittingBarcodes)
         : isSplittingBarcodes_(isSplittingBarcodes)
         , singleWriter_(nullptr)
+        , fact_(fact)
     {
         if (isSplittingBarcodes_)
-            CreateBarcodeWriters(filenames, mode, outputPrefix, outputSuffix);
+            CreateBarcodeWriters(filenames, outputPrefix, outputSuffix);
         else
         {
             const std::string outFn = outputPrefix + outputSuffix;
-            singleWriter_.reset(new GZFileWriter(outFn, mode));
+            singleWriter_.reset(newAbstractWriter(outFn));
         }
     }
 
 public:
-    GZFileWriter* WriterForRecord(const PacBio::BAM::BamRecord& b) const
+    AbstractWriter* WriterForRecord(const PacBio::BAM::BamRecord& b) const
     {
         // splitting records on barcode values
         if (isSplittingBarcodes_)
@@ -114,17 +146,22 @@ public:
 
 private:
     typedef std::pair<uint16_t, uint16_t>          BarcodePair;
-    typedef std::unique_ptr<GZFileWriter>          GZFileWriterPtr;
-    typedef std::map<BarcodePair, GZFileWriterPtr> WriterLookup;
+    typedef std::unique_ptr<AbstractWriter>          AbstractWriterPtr;
+    typedef std::map<BarcodePair, AbstractWriterPtr> WriterLookup;
 
 private:
     bool isSplittingBarcodes_;
-    GZFileWriterPtr singleWriter_;
+    AbstractWriterPtr singleWriter_;
     WriterLookup barcodeWriterLookup_;
+    AbstractWriterFactory const& fact_;
 
 private:
+    AbstractWriter* newAbstractWriter(std::string const& fn) const
+    {
+        return fact_.newAbstractWriter(fn);
+    }
+
     void CreateBarcodeWriters(const std::vector<std::string>& filenames,
-                              const std::string& mode,
                               const std::string& outputPrefix,
                               const std::string& outputSuffix)
     {
@@ -160,7 +197,7 @@ private:
                           "_" + std::to_string(barcodes.second)
                        };
                        const std::string outFn = outputPrefix + barcodeString + outputSuffix;
-                       barcodeWriterLookup_.emplace(barcodes, GZFileWriterPtr{new GZFileWriter(outFn, mode)});
+                       barcodeWriterLookup_.emplace(barcodes, AbstractWriterPtr{newAbstractWriter(outFn)});
                    }
                }
            }
