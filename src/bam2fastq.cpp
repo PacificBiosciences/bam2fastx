@@ -103,13 +103,13 @@ int main(int argc, char* argv[])
 
     if (options.get("uncompressed")) {
         fact.reset(new PacBio::Postprimary::PlainFileWriterFactory);
-        suffix = ".fasta";
+        suffix = ".fastq";
     } else {
         // setup open mode string
         std::string mode = "wb";
         mode += options["compression"].empty() ? "1" : options["compression"];
         fact.reset(new PacBio::Postprimary::GZFileWriterFactory(mode));
-        suffix = ".fasta.gz";
+        suffix = ".fastq.gz";
     }
     // setup output files
     PacBio::Postprimary::AbstractWriters writers(*fact,
