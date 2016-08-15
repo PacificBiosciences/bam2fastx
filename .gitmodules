@@ -4,9 +4,11 @@
 [submodule "third-party/cpp-optparse"]
 	path = third-party/cpp-optparse
 	url = https://github.com/weisslj/cpp-optparse
-[submodule "third-party/pbbam"]
-	path = third-party/pbbam
-	url = https://github.com/PacificBiosciences/pbbam
 [submodule "third-party/htslib"]
 	path = third-party/htslib
-	url = https://github.com/PacificBiosciences/htslib
+	url = ssh://git@bitbucket.nanofluidics.com:7999/sat/htslib.git
+    branch = master
+[submodule "third-party/pbbam"]
+	path = third-party/pbbam
+	url = ssh://git@bitbucket.nanofluidics.com:7999/sat/pbbam.git
+    branch = master
