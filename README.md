@@ -2,7 +2,7 @@
   <img src="http://www.pacb.com/wp-content/themes/pacific-biosciences/img/pacific-biosciences-logo-mobile.svg" alt="PacBio logo"/>
 </p>
 <h1 align="center">BAM2fastx tools</b></h1>
-The BAM2fastx tools allow conversion of PacBio BAM files into gzipped fasta and 
+The BAM2fastx tools allow conversion of PacBio BAM files into gzipped fasta and
 fastq files, including demultiplexing of barcoded data.
 
 ## DEPENDENCIES
@@ -11,13 +11,13 @@ Please install Boost and zlib.
 
 ## INSTALL
 
-- Download source from github  
+- Download source from github
 
         git clone https://github.com/PacificBiosciences/bam2fastx && cd bam2fastx
 
 - Sync your code with the latest git code base:
 
-        git pull --rebase origin master && git submodule update --init
+        git submodule update --init --remote
 
 - Create build directory
 
@@ -45,4 +45,6 @@ Both tools have an identical interface and take BAM and/or DataSet files as inpu
 
 ## HELP
 
-Futher help can be requested with `-h`. Issues? Problem? Please create a github issue.
+Support is only provided for official and stable
+[SMRT Analysis builds](http://www.pacb.com/products-and-services/analytical-software/)
+provided by PacBio and not for source builds.
