@@ -104,12 +104,7 @@ include_directories(
 
 #####
 
-if(BAM2FASTX_build_tests)
-    if(NOT TARGET gtest)
-      add_subdirectory(${BAM2FASTX_ThirdPartyDir}/gtest/googletest external/gtest/build)
-    endif()
-    # add_subdirectory(test/unit)
-endif()
+
 
 if(${ROOT_PROJECT_NAME} STREQUAL "BAM2FASTX")
     add_custom_target(check

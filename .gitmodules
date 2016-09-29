@@ -1,6 +1,3 @@
-[submodule "third-party/gtest"]
-    path = third-party/gtest
-    url = https://github.com/google/googletest
 [submodule "third-party/htslib"]
     path = third-party/htslib
     url = ../htslib.git
