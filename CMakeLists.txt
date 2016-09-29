@@ -3,7 +3,7 @@
 ########################################################################
 
 cmake_policy(SET CMP0048 NEW)  # lets us set version in project()
-project(BAM2FASTX VERSION 1.0.0 LANGUAGES CXX C)
+project(BAM2FASTX VERSION 1.1.0 LANGUAGES CXX C)
 cmake_minimum_required(VERSION 3.2)
 
 set(ROOT_PROJECT_NAME ${PROJECT_NAME} CACHE STRING "root project name")
@@ -42,16 +42,14 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -pthread")
 
 ################
 
-#  OPTIONPARSER
-if (NOT CPP_OPTPARSE_ROOT)
-  set(CPP_OPTPARSE_ROOT ${BAM2FASTX_ThirdPartyDir}/cpp-optparse)
+# pbcopper
+if (NOT pbcopper_INCLUDE_DIRS OR
+    NOT pbcopper_LIBRARIES)
+    set(pbcopper_build_tests OFF CACHE INTERNAL "" FORCE)
+    set(pbcopper_build_docs OFF CACHE INTERNAL "" FORCE)
+    set(pbcopper_build_examples OFF CACHE INTERNAL "" FORCE)
+    add_subdirectory(${BAM2FASTX_ThirdPartyDir}/pbcopper external/pbcopper/build)
 endif()
-
-add_library(OPTIONPARSER_LIB STATIC
-    ${CPP_OPTPARSE_ROOT}/OptionParser.h
-    ${CPP_OPTPARSE_ROOT}/OptionParser.cpp
-)
-target_include_directories(OPTIONPARSER_LIB PUBLIC ${CPP_OPTPARSE_ROOT})
 
 #  COMMON INTERFACE
 add_library(COMMON_INTERFACE INTERFACE)
@@ -101,6 +99,7 @@ include_directories(
     ${Htslib_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
+    ${pbcopper_INCLUDE_DIRS}
 )
 
 #####
@@ -128,7 +127,7 @@ add_executable(bam2fasta
 target_link_libraries(bam2fasta
   PUBLIC
     COMMON_INTERFACE
-    OPTIONPARSER_LIB
+    ${pbcopper_LIBRARIES}
     ${ZLIB_LIBRARIES}
 )
 
@@ -139,7 +138,7 @@ add_executable(bam2fastq
 target_link_libraries(bam2fastq
   PUBLIC
     COMMON_INTERFACE
-    OPTIONPARSER_LIB
+    ${pbcopper_LIBRARIES}
     ${ZLIB_LIBRARIES}
 )
 

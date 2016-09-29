@@ -37,12 +37,13 @@
 
 #include <string>
 
-#include "OptionParser.h"
 #include "pacbio/io/FileWriters.h"
 
 #include "pbbam/BamFile.h"
 #include "pbbam/BamRecord.h"
 #include "pbbam/PbiFilterQuery.h"
+
+#include <pbcopper/cli/CLI.h>
 
 #include "Version.h"
 
@@ -50,69 +51,43 @@ using namespace PacBio::BAM;
 
 static constexpr size_t wrapLength = 60;
 
-// Entry point
-int main(int argc, char* argv[])
+static int Runner(const PacBio::CLI::Results& options)
 {
-    auto parser = optparse::OptionParser().description(
-        "Converts multiple BAM and/or DataSet files into into gzipped FASTA file(s).")
-    .usage("-o outputPrefix [options] movieName.(subreads|hqregion|polymerase).bam")
-    .epilog("Example: bam2fasta movieName.subreads1.bam movieName2.subreads.bam -o myProject");
+    // Get source args
+    const std::vector<std::string> files = options.PositionalArguments();
 
-    parser.add_option("-v", "--version").dest("version").action("store_true").help("Print the tool version and exit");
-
-    auto groupMand = optparse::OptionGroup(parser, "Mandatory parameters");
-    groupMand.add_option("-o").dest("output").metavar("STRING").help("Prefix of output filenames");
-    parser.add_option_group(groupMand);
-
-    auto groupOpt = optparse::OptionGroup(parser, "Optional parameters");
-    groupOpt.add_option("-c").dest("compression").metavar("INT").help("Gzip compression level [1-9]");
-    groupOpt.add_option("-u").dest("uncompressed").action("store_true").help("Do not compress. In this case, we will not add .gz, and we ignore any -c setting.");
-    groupOpt.add_option("--split-barcodes").dest("split_barcodes").action("store_true")
-            .help("Split output into multiple FASTQ files, by barcode pairs. ");
-    parser.add_option_group(groupOpt);
-
-    optparse::Values options = parser.parse_args(argc, argv);
-    std::vector<std::string> args = parser.args();
-
-    // Print version
-    if (options.get("version"))
-    {
-        std::cerr << "bam2fasta version: " << BAM2FASTX_VERSION << std::endl;
-        exit(0);
-    }
-
-    if (args.size() == 0)
+    if (files.size() == 0)
     {
         std::cerr << "ERROR: INPUT EMPTY." << std::endl;
-        return 0;
+        return EXIT_FAILURE;
     }
     else if (options["output"].empty())
     {
         std::cerr << "ERROR: OUTPUT EMPTY." << std::endl;
-        return 0;
+        return EXIT_FAILURE;
     }
 
     std::unique_ptr<PacBio::Postprimary::AbstractWriterFactory> fact;
     std::string suffix;
 
-    if (options.get("uncompressed")) {
+    if (options["uncompressed"]) {
         fact.reset(new PacBio::Postprimary::PlainFileWriterFactory);
         suffix = ".fasta";
     } else {
         // setup open mode string
         std::string mode = "wb";
-        mode += options["compression"].empty() ? "1" : options["compression"];
+        mode += std::to_string(static_cast<int>(options["compression"]));
         fact.reset(new PacBio::Postprimary::GZFileWriterFactory(mode));
         suffix = ".fasta.gz";
     }
     // setup output files
     PacBio::Postprimary::AbstractWriters writers(*fact,
-                                               args,
+                                               files,
                                                options["output"],
                                                suffix,
-                                               options.is_set("split_barcodes"));
+                                               options["split_barcodes"]);
     // for each input file
-    for (const auto& input : args)
+    for (const auto& input : files)
     {
         // setup query (respecting dataset filter, if present)
         const PbiFilter filter = PbiFilter::FromDataSet(input);
@@ -143,4 +118,37 @@ int main(int argc, char* argv[])
             }
         }
     }
+
+    return EXIT_SUCCESS;
+}
+
+static PacBio::CLI::Interface CreateCLI()
+{
+    using Option = PacBio::CLI::Option;
+    PacBio::CLI::Interface i{"bam2fasta",
+                             "Converts multiple BAM and/or DataSet files into into gzipped FASTA file(s).",
+                             BAM2FASTX_VERSION};
+
+    i.AddHelpOption();      // use built-in help output
+    i.AddVersionOption();   // use built-in version output
+
+    i.AddPositionalArguments({
+        {"input",  "Input file.",  "INPUT"}
+    });
+
+    i.AddOptions(
+    {
+        {"output", {"o", "output"}, "Prefix of output filenames", Option::StringType("")},
+        {"compression", {"c"}, "Gzip compression level [1-9]", Option::IntType(1)},
+        {"uncompressed", {"u"}, "Do not compress. In this case, we will not add .gz, and we ignore any -c setting.", Option::BoolType()},
+        {"split_barcodes", {"split-barcodes"}, "Split output into multiple FASTA files, by barcode pairs.", Option::BoolType()}
+    });
+
+    return i;
+}
+
+// Entry point
+int main(int argc, char* argv[])
+{
+    return PacBio::CLI::Run(argc, argv, CreateCLI(), &Runner);
 }
