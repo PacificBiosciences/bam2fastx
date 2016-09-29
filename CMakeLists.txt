@@ -6,6 +6,8 @@ cmake_policy(SET CMP0048 NEW)  # lets us set version in project()
 project(BAM2FASTX VERSION 1.0.0 LANGUAGES CXX C)
 cmake_minimum_required(VERSION 3.2)
 
+set(ROOT_PROJECT_NAME ${PROJECT_NAME} CACHE STRING "root project name")
+
 set(PacBioBAM_build_docs    OFF CACHE INTERNAL "" FORCE)
 set(PacBioBAM_build_tests   OFF CACHE INTERNAL "" FORCE)
 set(PacBioBAM_build_tools   OFF CACHE INTERNAL "" FORCE)
@@ -28,7 +30,7 @@ option(BAM2FASTX_build_tests  "Build unit tests." ON)
 set(BAM2FASTX_RootDir       ${BAM2FASTX_SOURCE_DIR})
 set(BAM2FASTX_IncludeDir    ${BAM2FASTX_RootDir}/include)
 set(BAM2FASTX_SourceDir     ${BAM2FASTX_RootDir}/src)
-set(BAM2FASTX_TestsDir      ${BAM2FASTX_RootDir}/test)
+set(BAM2FASTX_TestsDir      ${BAM2FASTX_RootDir}/tests)
 set(BAM2FASTX_ThirdPartyDir ${BAM2FASTX_RootDir}/third-party)
 
 # shared CXX flags for src & tests
@@ -108,6 +110,13 @@ if(BAM2FASTX_build_tests)
       add_subdirectory(${BAM2FASTX_ThirdPartyDir}/gtest/googletest external/gtest/build)
     endif()
     # add_subdirectory(test/unit)
+endif()
+
+if(${ROOT_PROJECT_NAME} STREQUAL "BAM2FASTX")
+    add_custom_target(check
+        COMMAND __PBTEST_BAM2FASTA_EXE=${CMAKE_BINARY_DIR}/bam2fasta __PBTEST_BAM2FASTQ_EXE=${CMAKE_BINARY_DIR}/bam2fastq ${BAM2FASTX_RootDir}/scripts/cram --xunit-file=${CMAKE_BINARY_DIR}/b2f-cram.xml ${BAM2FASTX_TestsDir}/cram/*.t
+        DEPENDS bam2fasta bam2fastq
+        WORKING_DIRECTORY ${BAM2FASTX_RootDir})
 endif()
 
 #####

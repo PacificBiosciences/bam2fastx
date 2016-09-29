@@ -21,3 +21,6 @@ echo "## Build binaries"
 ( cd build && cmake -DZLIB_INCLUDE_DIR=/mnt/software/z/zlib/1.2.5/include -DZLIB_LIBRARY=/mnt/software/z/zlib/1.2.5/lib/libz.so -GNinja .. )
 ( cd build && ninja htslibSrc )
 ( cd build && ninja )
+
+echo "## Test cram tests"
+( cd build && ninja check)
