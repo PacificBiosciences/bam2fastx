@@ -1,9 +1,3 @@
-[submodule "third-party/gtest"]
-    path = third-party/gtest
-    url = https://github.com/google/googletest
-[submodule "third-party/cpp-optparse"]
-    path = third-party/cpp-optparse
-    url = https://github.com/weisslj/cpp-optparse
 [submodule "third-party/htslib"]
     path = third-party/htslib
     url = ../htslib.git
@@ -12,3 +6,7 @@
     path = third-party/pbbam
     url = ../pbbam.git
     branch = master
+[submodule "third-party/pbcopper"]
+	path = third-party/pbcopper
+	url = ../pbcopper.git
+	branch = master

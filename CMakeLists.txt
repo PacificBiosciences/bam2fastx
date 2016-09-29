@@ -3,8 +3,10 @@
 ########################################################################
 
 cmake_policy(SET CMP0048 NEW)  # lets us set version in project()
-project(BAM2FASTX VERSION 1.0.0 LANGUAGES CXX C)
+project(BAM2FASTX VERSION 1.1.0 LANGUAGES CXX C)
 cmake_minimum_required(VERSION 3.2)
+
+set(ROOT_PROJECT_NAME ${PROJECT_NAME} CACHE STRING "root project name")
 
 set(PacBioBAM_build_docs    OFF CACHE INTERNAL "" FORCE)
 set(PacBioBAM_build_tests   OFF CACHE INTERNAL "" FORCE)
@@ -28,7 +30,7 @@ option(BAM2FASTX_build_tests  "Build unit tests." ON)
 set(BAM2FASTX_RootDir       ${BAM2FASTX_SOURCE_DIR})
 set(BAM2FASTX_IncludeDir    ${BAM2FASTX_RootDir}/include)
 set(BAM2FASTX_SourceDir     ${BAM2FASTX_RootDir}/src)
-set(BAM2FASTX_TestsDir      ${BAM2FASTX_RootDir}/test)
+set(BAM2FASTX_TestsDir      ${BAM2FASTX_RootDir}/tests)
 set(BAM2FASTX_ThirdPartyDir ${BAM2FASTX_RootDir}/third-party)
 
 # shared CXX flags for src & tests
@@ -40,16 +42,14 @@ SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -pthread")
 
 ################
 
-#  OPTIONPARSER
-if (NOT CPP_OPTPARSE_ROOT)
-  set(CPP_OPTPARSE_ROOT ${BAM2FASTX_ThirdPartyDir}/cpp-optparse)
+# pbcopper
+if (NOT pbcopper_INCLUDE_DIRS OR
+    NOT pbcopper_LIBRARIES)
+    set(pbcopper_build_tests OFF CACHE INTERNAL "" FORCE)
+    set(pbcopper_build_docs OFF CACHE INTERNAL "" FORCE)
+    set(pbcopper_build_examples OFF CACHE INTERNAL "" FORCE)
+    add_subdirectory(${BAM2FASTX_ThirdPartyDir}/pbcopper external/pbcopper/build)
 endif()
-
-add_library(OPTIONPARSER_LIB STATIC
-    ${CPP_OPTPARSE_ROOT}/OptionParser.h
-    ${CPP_OPTPARSE_ROOT}/OptionParser.cpp
-)
-target_include_directories(OPTIONPARSER_LIB PUBLIC ${CPP_OPTPARSE_ROOT})
 
 #  COMMON INTERFACE
 add_library(COMMON_INTERFACE INTERFACE)
@@ -99,15 +99,18 @@ include_directories(
     ${Htslib_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
+    ${pbcopper_INCLUDE_DIRS}
 )
 
 #####
 
-if(BAM2FASTX_build_tests)
-    if(NOT TARGET gtest)
-      add_subdirectory(${BAM2FASTX_ThirdPartyDir}/gtest/googletest external/gtest/build)
-    endif()
-    # add_subdirectory(test/unit)
+
+
+if(${ROOT_PROJECT_NAME} STREQUAL "BAM2FASTX")
+    add_custom_target(check
+        COMMAND __PBTEST_BAM2FASTA_EXE=${CMAKE_BINARY_DIR}/bam2fasta __PBTEST_BAM2FASTQ_EXE=${CMAKE_BINARY_DIR}/bam2fastq ${BAM2FASTX_RootDir}/scripts/cram --xunit-file=${CMAKE_BINARY_DIR}/b2f-cram.xml ${BAM2FASTX_TestsDir}/cram/*.t
+        DEPENDS bam2fasta bam2fastq
+        WORKING_DIRECTORY ${BAM2FASTX_RootDir})
 endif()
 
 #####
@@ -119,7 +122,7 @@ add_executable(bam2fasta
 target_link_libraries(bam2fasta
   PUBLIC
     COMMON_INTERFACE
-    OPTIONPARSER_LIB
+    ${pbcopper_LIBRARIES}
     ${ZLIB_LIBRARIES}
 )
 
@@ -130,7 +133,7 @@ add_executable(bam2fastq
 target_link_libraries(bam2fastq
   PUBLIC
     COMMON_INTERFACE
-    OPTIONPARSER_LIB
+    ${pbcopper_LIBRARIES}
     ${ZLIB_LIBRARIES}
 )
 
