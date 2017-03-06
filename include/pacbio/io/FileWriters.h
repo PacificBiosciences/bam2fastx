@@ -174,7 +174,8 @@ private:
            {
                // fetch barcode data
                PacBio::BAM::PbiRawData idx(bamFile.PacBioIndexFilename());
-               if (!idx.HasBarcodeData())
+               if (idx.NumReads() == 0) continue;
+               else if (!idx.HasBarcodeData())
                    throw std::runtime_error(bamFile.Filename() + " has no barcoding data");
                const auto& barcodeData = idx.BarcodeData();
                const auto& bcFor = barcodeData.bcForward_;
