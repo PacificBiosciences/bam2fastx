@@ -7,6 +7,7 @@ module load ccache/3.2.3
 module load zlib/1.2.5
 module load ninja/1.7.1
 module load boost/1.60
+unset PKG_CONFIG_LIST
 
 echo "# BUILD AND TEST"
 

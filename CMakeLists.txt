@@ -86,7 +86,10 @@ endif()
 
 if (NOT ZLIB_INCLUDE_DIRS OR
     NOT ZLIB_LIBRARIES)
-    find_package(ZLIB REQUIRED)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(ZLIB zlib)
+else()
+    set(ZLIB_LDFLAGS ${ZLIB_LIBRARIES})
 endif()
 
 #####
@@ -123,7 +126,7 @@ target_link_libraries(bam2fasta
   PUBLIC
     COMMON_INTERFACE
     ${pbcopper_LIBRARIES}
-    ${ZLIB_LIBRARIES}
+    ${ZLIB_LDFLAGS}
 )
 
 #  bam2fastq
@@ -134,7 +137,7 @@ target_link_libraries(bam2fastq
   PUBLIC
     COMMON_INTERFACE
     ${pbcopper_LIBRARIES}
-    ${ZLIB_LIBRARIES}
+    ${ZLIB_LDFLAGS}
 )
 
 if (PBBAM_MISSING)
