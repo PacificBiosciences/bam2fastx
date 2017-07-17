@@ -19,7 +19,7 @@ if [ ! -d build ] ; then mkdir build ; fi
 echo "## Build binaries"
 export CXXFLAGS="-fPIC -static-libstdc++"
 ( cd build && rm -rf * )
-( cd build && cmake -DZLIB_INCLUDE_DIR=`pkg-config --cflags-only-I zlib|sed -e 's/-I//'` -DZLIB_LIBRARY=`pkg-config --libs-only-L zlib|sed -e 's/-L//'`/libz.so -GNinja .. )
+( cd build && cmake -DZLIB_INCLUDE_DIR=`pkg-config --cflags-only-I zlib|sed -e 's/-I//'` -DZLIB_LIBRARY=`pkg-config --libs-only-L zlib|sed -e 's/-L//;s/  *$//g'`/libz.so -GNinja .. )
 ( cd build && ninja htslibSrc )
 ( cd build && ninja )
 
