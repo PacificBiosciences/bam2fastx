@@ -23,6 +23,11 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
 # Build-time options
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK    ccache)
+endif()
 option(BAM2FASTX_build_bin    "Build bam2fasta and bamfastq." ON)
 option(BAM2FASTX_build_tests  "Build unit tests." ON)
 
