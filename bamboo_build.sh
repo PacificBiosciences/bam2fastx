@@ -3,11 +3,13 @@ type module >& /dev/null || source /mnt/software/Modules/current/init/bash
 module load git/2.8.3
 module load gcc/4.9.2
 module load cmake/3.7.2
-module load ccache/3.2.3
+module load ccache_base/3.2.3
 module load zlib/1.2.5
 module load ninja/1.7.1
 module load boost/1.60
 unset PKG_CONFIG_LIST
+export CCACHE_BASEDIR=$PWD
+export VERBOSE=1
 
 echo "# BUILD AND TEST"
 
