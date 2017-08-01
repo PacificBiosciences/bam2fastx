@@ -58,25 +58,11 @@ add_library(COMMON_INTERFACE INTERFACE)
 
 if (NOT PacBioBAM_LIBRARIES)
     set(PBBAM_MISSING ON)
-
-    if(NOT HTSLIB_INCLUDE_DIRS OR
-       NOT HTSLIB_LIBRARIES)
-        if(HTSLIB_ROOTDIR)
-            find_package(htslib
-                         PATHS ${HTSLIB_ROOTDIR}
-                         REQUIRED)
-        else()
-            find_package(htslib
-                         PATHS ${BAM2FASTX_ThirdPartyDir}/htslib
-                         REQUIRED)
-        endif()
-    endif()
     add_subdirectory(${BAM2FASTX_ThirdPartyDir}/pbbam external/pbbam/build)
     target_link_libraries(COMMON_INTERFACE INTERFACE pbbam)
 else()
     target_link_libraries(COMMON_INTERFACE INTERFACE ${PacBioBAM_LIBRARIES} ${HTSLIB_LIBRARIES})
 endif()
-
 
 ################
 
@@ -139,11 +125,6 @@ target_link_libraries(bam2fastq
     ${pbcopper_LIBRARIES}
     ${ZLIB_LDFLAGS}
 )
-
-if (PBBAM_MISSING)
-    add_dependencies(bam2fasta htslib)
-    add_dependencies(bam2fastq htslib)
-endif()
 
 set(ALL_EXE_TARGETS bam2fasta bam2fastq)
 
