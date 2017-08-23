@@ -3,7 +3,7 @@ type module >& /dev/null || source /mnt/software/Modules/current/init/bash
 module load git/2.8.3
 module load gcc/6.4.0
 module load cmake/3.7.2
-module load ccache/3.4.3
+module load ccache/3.3.4
 module load zlib/1.2.11
 module load ninja/1.7.1
 module load boost/1.60
