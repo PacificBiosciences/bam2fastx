@@ -39,6 +39,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BAM2FASTX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${BAM2FASTX_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BAM2FASTX_FLAGS}")
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -pthread")
+set(CMAKE_CXX_STANDARD          14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 ################
 
@@ -58,25 +61,11 @@ add_library(COMMON_INTERFACE INTERFACE)
 
 if (NOT PacBioBAM_LIBRARIES)
     set(PBBAM_MISSING ON)
-
-    if(NOT HTSLIB_INCLUDE_DIRS OR
-       NOT HTSLIB_LIBRARIES)
-        if(HTSLIB_ROOTDIR)
-            find_package(htslib
-                         PATHS ${HTSLIB_ROOTDIR}
-                         REQUIRED)
-        else()
-            find_package(htslib
-                         PATHS ${BAM2FASTX_ThirdPartyDir}/htslib
-                         REQUIRED)
-        endif()
-    endif()
     add_subdirectory(${BAM2FASTX_ThirdPartyDir}/pbbam external/pbbam/build)
     target_link_libraries(COMMON_INTERFACE INTERFACE pbbam)
 else()
     target_link_libraries(COMMON_INTERFACE INTERFACE ${PacBioBAM_LIBRARIES} ${HTSLIB_LIBRARIES})
 endif()
-
 
 ################
 
@@ -86,7 +75,10 @@ endif()
 
 if (NOT ZLIB_INCLUDE_DIRS OR
     NOT ZLIB_LIBRARIES)
-    find_package(ZLIB REQUIRED)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(ZLIB zlib)
+else()
+    set(ZLIB_LDFLAGS ${ZLIB_LIBRARIES})
 endif()
 
 #####
@@ -123,7 +115,7 @@ target_link_libraries(bam2fasta
   PUBLIC
     COMMON_INTERFACE
     ${pbcopper_LIBRARIES}
-    ${ZLIB_LIBRARIES}
+    ${ZLIB_LDFLAGS}
 )
 
 #  bam2fastq
@@ -134,13 +126,8 @@ target_link_libraries(bam2fastq
   PUBLIC
     COMMON_INTERFACE
     ${pbcopper_LIBRARIES}
-    ${ZLIB_LIBRARIES}
+    ${ZLIB_LDFLAGS}
 )
-
-if (PBBAM_MISSING)
-    add_dependencies(bam2fasta htslib)
-    add_dependencies(bam2fastq htslib)
-endif()
 
 set(ALL_EXE_TARGETS bam2fasta bam2fastq)
 
