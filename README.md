@@ -23,17 +23,25 @@ Please install Boost and zlib.
 
         mkdir build && cd build
 
-- Invoke cmake with Boost and zlib as system libraries
+- Invoke cmake with Boost, htslib, and zlib as system libraries
 
         cmake ..
 
 - Or with user-specific paths
 
-        cmake -DBoost_INCLUDE_DIRS=/path/to/boost/include -DZLIB_INCLUDE_DIRS=/path/to/zlib/include -DZLIB_LIBRARIES=/path/to/zlib/lib ..
+        cmake \
+              -DBoost_INCLUDE_DIRS=/path/to/boost/include \
+              -DZLIB_INCLUDE_DIRS=/path/to/zlib/include \
+              -DZLIB_LIBRARIES=/path/to/zlib/libz.a \
+              -DHTSLIB_INCLUDE_DIRS=/path/to/htslib/include \
+              -DHTSLIB_LIBRARIES=/path/to/htslib/libhts.a \
+              ..
 
 - Build
 
         make
+
+### Coming soon: Build with Meson!
 
 ## USAGE
 
