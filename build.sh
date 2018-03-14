@@ -3,7 +3,7 @@
 echo "# DEPENDENCIES"
 echo "## Load modules"
 source /mnt/software/Modules/current/init/bash
-module load git gcc/5.3.0 cmake ccache zlib/1.2.5 ninja boost htslib
+module load git gcc cmake ccache zlib ninja boost htslib
 
 echo "## Clean"
 git clean -fd
