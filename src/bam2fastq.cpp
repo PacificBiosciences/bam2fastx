@@ -38,11 +38,11 @@
 #include <cassert>
 #include <string>
 
-#include "pacbio/io/FileWriters.h"
+#include <pacbio/io/FileWriters.h>
 
-#include "pbbam/BamFile.h"
-#include "pbbam/BamRecord.h"
-#include "pbbam/PbiFilterQuery.h"
+#include <pbbam/BamFile.h>
+#include <pbbam/BamRecord.h>
+#include <pbbam/PbiFilterQuery.h>
 
 #include <pbcopper/cli/CLI.h>
 
