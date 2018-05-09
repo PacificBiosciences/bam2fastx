@@ -20,5 +20,5 @@ Test if the output is identical SEQUEL CCS
 Test if compression works
   $ $__PBTEST_BAM2FASTQ_EXE $TESTDIR/../data/RSII.bam -o rsii_1 -c 1
   $ $__PBTEST_BAM2FASTQ_EXE $TESTDIR/../data/RSII.bam -o rsii_9 -c 9
-  $ file1=$(ls -l rsii_1.fastq.gz| awk '{print $5}'); file2=$(ls -l rsii_9.fastq.gz| awk '{print $5}'); if [ "$file1" -gt "$file2" ] ; then echo "true"; else echo "false"; fi
+  $ file1=$(wc -c < rsii_1.fastq.gz); file2=$(wc -c < rsii_9.fastq.gz); if [ "$file1" -gt "$file2" ] ; then echo "true"; else echo "false"; fi
   true
