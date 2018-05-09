@@ -30,6 +30,9 @@ bam2fastx_incdir = include_directories('include')
 # dependencies #
 ################
 
+# boost
+bam2fastx_boost_dep = dependency('boost', required : true)
+
 # pbbam
 bam2fastx_pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
 
@@ -39,7 +42,7 @@ bam2fastx_pbcopper_dep = dependency('pbcopper', fallback : ['pbcopper', 'pbcoppe
 # zlib
 bam2fastx_zlib_dep = dependency('zlib', required : true)
 
-bam2fastx_deps = [bam2fastx_pbbam_dep, bam2fastx_pbcopper_dep, bam2fastx_zlib_dep]
+bam2fastx_deps = [bam2fastx_boost_dep, bam2fastx_pbbam_dep, bam2fastx_pbcopper_dep, bam2fastx_zlib_dep]
 
 ########################
 # sources + executable #
