@@ -3,3 +3,6 @@ build
 # meson
 subprojects/pbbam
 subprojects/pbcopper
+
+# bundled cram script bytecode
+*.pyc
