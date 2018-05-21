@@ -69,6 +69,7 @@ static int Runner(const PacBio::CLI::Results& options)
 
     std::unique_ptr<PacBio::Postprimary::AbstractWriterFactory> fact;
     std::string suffix;
+    std::string namePrefix = options["seqid_prefix"];
 
     if (options["uncompressed"]) {
         fact.reset(new PacBio::Postprimary::PlainFileWriterFactory);
@@ -101,7 +102,7 @@ static int Runner(const PacBio::CLI::Results& options)
             assert(fastaStream);
 
             // write header
-            const auto name = record.FullName();
+            const auto name = namePrefix + record.FullName();
             fastaStream->Write(">", 1);
             fastaStream->Write(name.c_str(), name.size());
             fastaStream->Write("\n", 1);
@@ -141,7 +142,8 @@ static PacBio::CLI::Interface CreateCLI()
         {"output", {"o", "output"}, "Prefix of output filenames", Option::StringType("")},
         {"compression", {"c"}, "Gzip compression level [1-9]", Option::IntType(1)},
         {"uncompressed", {"u"}, "Do not compress. In this case, we will not add .gz, and we ignore any -c setting.", Option::BoolType()},
-        {"split_barcodes", {"split-barcodes"}, "Split output into multiple FASTA files, by barcode pairs.", Option::BoolType()}
+        {"split_barcodes", {"split-barcodes"}, "Split output into multiple FASTA files, by barcode pairs.", Option::BoolType()},
+        {"seqid_prefix", {"p", "seqid-prefix"}, "Prefix for sequence IDs in headers", Option::StringType("")}
     });
 
     return i;
