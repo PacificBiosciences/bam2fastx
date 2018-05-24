@@ -22,3 +22,8 @@ Test if compression works
   $ $__PBTEST_BAM2FASTQ_EXE $TESTDIR/../data/RSII.bam -o rsii_9 -c 9
   $ file1=$(wc -c < rsii_1.fastq.gz); file2=$(wc -c < rsii_9.fastq.gz); if [ "$file1" -gt "$file2" ] ; then echo "true"; else echo "false"; fi
   true
+
+Test header seqid prefix
+  $ $__PBTEST_BAM2FASTQ_EXE $TESTDIR/../data/RSII.bam -o rsii_prefixed -u -p testprefix_
+  $ grep -c "@testprefix" rsii_prefixed.fastq
+  10
