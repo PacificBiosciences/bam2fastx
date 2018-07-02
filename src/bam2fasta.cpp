@@ -46,11 +46,23 @@ static int Runner(const PacBio::CLI::Results& options)
         fact.reset(new PacBio::Postprimary::GZFileWriterFactory(mode));
         suffix = ".fasta.gz";
     }
+    bool isStreamed;
+    if ("-" == options["output"]) {
+        if (options["split_barcodes"]) {
+            const auto msg = "Streamed mode cannot be used with barcodes.";
+            throw std::runtime_error(msg);
+        }
+        // Ignore 'suffix'.
+        isStreamed = true;
+    } else {
+        isStreamed = false;
+    }
     // setup output files
     PacBio::Postprimary::AbstractWriters writers(*fact,
                                                files,
                                                options["output"],
                                                suffix,
+                                               isStreamed,
                                                options["split_barcodes"]);
     // for each input file
     for (const auto& input : files)
@@ -104,7 +116,7 @@ static PacBio::CLI::Interface CreateCLI()
 
     i.AddOptions(
     {
-        {"output", {"o", "output"}, "Prefix of output filenames", Option::StringType("")},
+        {"output", {"o", "output"}, "Prefix of output filenames ('-' implies streaming, not yet supported with compression, nor with split_barcodes)", Option::StringType("")},
         {"compression", {"c"}, "Gzip compression level [1-9]", Option::IntType(1)},
         {"uncompressed", {"u"}, "Do not compress. In this case, we will not add .gz, and we ignore any -c setting.", Option::BoolType()},
         {"split_barcodes", {"split-barcodes"}, "Split output into multiple FASTA files, by barcode pairs.", Option::BoolType()},

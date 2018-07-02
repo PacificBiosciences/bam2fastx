@@ -61,10 +61,12 @@ static int Runner(const PacBio::CLI::Results& options)
         suffix = ".fastq.gz";
     }
     // setup output files
+    const bool isStreamed = false;
     PacBio::Postprimary::AbstractWriters writers(*fact,
                                                files,
                                                options["output"],
                                                suffix,
+                                               isStreamed,
                                                options["split_barcodes"]);
     // for each input file
     for (const auto& input : files)

@@ -7,6 +7,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <iostream>
+#include <cassert>
 
 #include "pbbam/BamRecord.h"
 #include "pbbam/DataSet.h"
@@ -14,6 +16,7 @@
 #include "AbstractWriter.h"
 #include "GZFileWriter.h"
 #include "PlainFileWriter.h"
+#include "StreamWriter.h"
 
 namespace PacBio {
 namespace Postprimary {
@@ -70,17 +73,22 @@ public:
                   const std::vector<std::string>& filenames,
                   const std::string& outputPrefix,
                   const std::string& outputSuffix,
+                  const bool isStreamed,
                   const bool isSplittingBarcodes)
         : isSplittingBarcodes_(isSplittingBarcodes)
         , singleWriter_(nullptr)
         , fact_(fact)
     {
-        if (isSplittingBarcodes_)
+        if (isSplittingBarcodes_) {
+            assert(!isStreamed);
             CreateBarcodeWriters(filenames, outputPrefix, outputSuffix);
-        else
-        {
-            const std::string outFn = outputPrefix + outputSuffix;
-            singleWriter_.reset(newAbstractWriter(outFn));
+        } else {
+            if (isStreamed) {
+                singleWriter_.reset(new StreamWriter(std::cout));
+            } else {
+                const std::string outFn = outputPrefix + outputSuffix;
+                singleWriter_.reset(newAbstractWriter(outFn));
+            }
         }
     }
 
