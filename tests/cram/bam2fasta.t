@@ -19,3 +19,8 @@ Test header seqid prefix
   $ $__PBTEST_BAM2FASTA_EXE $TESTDIR/../data/RSII.bam -o rsii_prefixed -u -p testprefix
   $ grep -c ">testprefix" rsii_prefixed.fasta
   10
+
+Test streaming
+  $ $__PBTEST_BAM2FASTA_EXE $TESTDIR/../data/RSII.bam -o - -p myprefix >| rsii_prefixed.fasta
+  $ grep -c ">myprefix" rsii_prefixed.fasta
+  10
