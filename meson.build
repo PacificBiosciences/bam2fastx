@@ -40,9 +40,17 @@ bam2fastx_pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
 bam2fastx_pbcopper_dep = dependency('pbcopper', fallback : ['pbcopper', 'pbcopper_dep'])
 
 # zlib
-bam2fastx_zlib_dep = dependency('zlib', required : true)
+bam2fastx_zlib_dep = dependency('zlib', required : true, fallback : ['zlib', 'zlib_dep'])
 
-bam2fastx_deps = [bam2fastx_boost_dep, bam2fastx_pbbam_dep, bam2fastx_pbcopper_dep, bam2fastx_zlib_dep]
+# htslib
+bam2fastx_htslib_dep = dependency('htslib', required : true, version : '>=1.4', fallback : ['htslib', 'htslib_dep'])
+
+bam2fastx_deps = [
+  bam2fastx_boost_dep,
+  bam2fastx_pbbam_dep,
+  bam2fastx_pbcopper_dep,
+  bam2fastx_zlib_dep,
+  bam2fastx_htslib_dep]
 
 ########################
 # sources + executable #
