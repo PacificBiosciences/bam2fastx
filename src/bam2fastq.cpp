@@ -9,11 +9,57 @@
 #include <pbbam/BamRecord.h>
 #include <pbbam/PbiFilterQuery.h>
 
-#include <pbcopper/cli/CLI.h>
+#include <pbcopper/cli2/CLI.h>
+#include <pbcopper/cli2/Interface.h>
 
 #include "Version.h"
 
 using namespace PacBio::BAM;
+
+namespace Options {
+
+const PacBio::CLI_v2::PositionalArgument Input {
+R"({
+    "name" : "input",
+    "description" : "Input file(s)."
+})"};
+
+const PacBio::CLI_v2::Option OutputPrefix {
+R"({
+    "names" : ["o", "output"],
+    "description" : "Prefix of output filenames",
+    "type" : "string"
+})"};
+
+const PacBio::CLI_v2::Option CompressionLevel {
+R"({
+    "names" : ["c"],
+    "description" : "Gzip compression level [1-9]",
+    "type" : "int",
+    "default" : 1
+})"};
+
+const PacBio::CLI_v2::Option Uncompressed {
+R"({
+    "names" : ["u"],
+    "description" : "Do not compress. In this case, we will not add .gz, and we ignore any -c setting."
+})"};
+
+const PacBio::CLI_v2::Option SplitBarcodes {
+R"({
+    "names" : ["split-barcodes"],
+    "description" : "Split output into multiple FASTQ files, by barcode pairs."
+})"};
+
+const PacBio::CLI_v2::Option SeqIdPrefix {
+R"({
+    "names" : ["p", "seqid-prefix"],
+    "description" : "Prefix for sequence IDs in headers",
+    "type" : "string"
+})"};
+
+
+} // namespace Options
 
 std::string DetermineReadType(const BamHeader& header)
 {
@@ -30,17 +76,22 @@ std::string DetermineReadType(const BamHeader& header)
     return globalReadType;
 }
 
-static int Runner(const PacBio::CLI::Results& options)
+static int Runner(const PacBio::CLI_v2::Results& options)
 {
     // Get source args
     const std::vector<std::string> files = options.PositionalArguments();
+    const std::string outputPrefix = options[Options::OutputPrefix];
+    const std::string seqIdPrefix = options[Options::SeqIdPrefix];
+    const int compressionLevel = options[Options::CompressionLevel];
+    const bool uncompressed = options[Options::Uncompressed];
+    const bool splitBarcodes = options[Options::SplitBarcodes];
 
     if (files.size() == 0)
     {
         std::cerr << "ERROR: INPUT EMPTY." << std::endl;
         return 0;
     }
-    else if (options["output"].empty())
+    else if (outputPrefix.empty())
     {
         std::cerr << "ERROR: OUTPUT EMPTY." << std::endl;
         return 0;
@@ -48,15 +99,15 @@ static int Runner(const PacBio::CLI::Results& options)
 
     std::unique_ptr<PacBio::Postprimary::AbstractWriterFactory> fact;
     std::string suffix;
-    std::string namePrefix = options["seqid_prefix"];
+    std::string namePrefix = seqIdPrefix;
 
-    if (options["uncompressed"]) {
+    if (uncompressed) {
         fact.reset(new PacBio::Postprimary::PlainFileWriterFactory);
         suffix = ".fastq";
     } else {
         // setup open mode string
         std::string mode = "wb";
-        mode += std::to_string(static_cast<int>(options["compression"]));
+        mode += std::to_string(compressionLevel);
         fact.reset(new PacBio::Postprimary::GZFileWriterFactory(mode));
         suffix = ".fastq.gz";
     }
@@ -64,10 +115,10 @@ static int Runner(const PacBio::CLI::Results& options)
     const bool isStreamed = false;
     PacBio::Postprimary::AbstractWriters writers(*fact,
                                                files,
-                                               options["output"],
+                                               outputPrefix,
                                                suffix,
                                                isStreamed,
-                                               options["split_barcodes"]);
+                                               splitBarcodes);
     // for each input file
     for (const auto& input : files)
     {
@@ -129,27 +180,25 @@ static int Runner(const PacBio::CLI::Results& options)
     return EXIT_SUCCESS;
 }
 
-static PacBio::CLI::Interface CreateCLI()
+static PacBio::CLI_v2::Interface CreateCLI()
 {
-    using Option = PacBio::CLI::Option;
-    PacBio::CLI::Interface i{"bam2fastq",
-                             "Converts multiple BAM and/or DataSet files into into gzipped FASTQ file(s).",
-                             BAM2FASTX_VERSION};
+    PacBio::CLI_v2::Interface i{
+        "bam2fastq",
+        "Converts multiple BAM and/or DataSet files into into gzipped FASTQ file(s).",
+        BAM2FASTX_VERSION};
 
-    i.AddHelpOption();      // use built-in help output
-    i.AddVersionOption();   // use built-in version output
+    i.DisableLogLevelOption()
+     .DisableLogFileOption()
+     .DisableNumThreadsOption();
 
-    i.AddPositionalArguments({
-        {"input",  "Input file.",  "INPUT"}
-    });
-
-    i.AddOptions(
+    i.AddPositionalArgument(Options::Input);
+    i.AddOptionGroup("Options",
     {
-        {"output", {"o", "output"}, "Prefix of output filenames", Option::StringType("")},
-        {"compression", {"c"}, "Gzip compression level [1-9]", Option::IntType(1)},
-        {"uncompressed", {"u"}, "Do not compress. In this case, we will not add .gz, and we ignore any -c setting.", Option::BoolType()},
-        {"split_barcodes", {"split-barcodes"}, "Split output into multiple FASTQ files, by barcode pairs.", Option::BoolType()},
-        {"seqid_prefix", {"p", "seqid-prefix"}, "Prefix for sequence IDs in headers", Option::StringType("")}
+        Options::OutputPrefix,
+        Options::CompressionLevel,
+        Options::Uncompressed,
+        Options::SplitBarcodes,
+        Options::SeqIdPrefix
     });
 
     return i;
@@ -158,5 +207,5 @@ static PacBio::CLI::Interface CreateCLI()
 // Entry point
 int main(int argc, char* argv[])
 {
-    return PacBio::CLI::Run(argc, argv, CreateCLI(), &Runner);
+    return PacBio::CLI_v2::Run(argc, argv, CreateCLI(), &Runner);
 }
