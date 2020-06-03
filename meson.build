@@ -5,10 +5,10 @@ project(
   default_options : [
     'buildtype=release',
     'warning_level=3',
-    'cpp_std=c++14',
+    'cpp_std=c++17',
     'b_ndebug=if-release'],
   license : 'BSD-3',
-  meson_version : '>= 0.46.0')
+  meson_version : '>= 0.52.0')
 
 ############
 # CXXFLAGS #
@@ -31,7 +31,7 @@ bam2fastx_incdir = include_directories('include')
 ################
 
 # boost
-bam2fastx_boost_dep = dependency('boost', required : true)
+bam2fastx_boost_dep = dependency('boost', include_type : 'system', required : true)
 
 # pbbam
 bam2fastx_pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
