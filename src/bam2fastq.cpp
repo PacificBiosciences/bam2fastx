@@ -129,7 +129,7 @@ static int Runner(const PacBio::CLI_v2::Results& options)
         // Iterate over all records and convert online
         bool mayHaveInsertQV = true;
         bool firstRecord = true;
-        for (const auto record : bamQuery)
+        for (const auto& record : bamQuery)
         {
             // grab data for this file from first  record
             if (firstRecord)
