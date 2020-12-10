@@ -127,7 +127,7 @@ static int Runner(const PacBio::CLI_v2::Results& options)
         const PbiFilterQuery bamQuery(filter, input);
 
         // Iterate over all records and convert online
-        for (const auto record : bamQuery)
+        for (const auto& record : bamQuery)
         {
             // get appropriate writer for record
             auto fastaStream = writers.WriterForRecord(record);
