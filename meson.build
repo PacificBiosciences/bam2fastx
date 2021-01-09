@@ -1,7 +1,7 @@
 project(
   'bam2fastx',
   'cpp',
-  version : '1.3.0',
+  version : '1.3.1',
   default_options : [
     'buildtype=release',
     'warning_level=3',
