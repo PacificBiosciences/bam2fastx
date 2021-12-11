@@ -8,7 +8,7 @@ test(
   'bam2fasta cram test',
   bam2fastx_cram_script,
   args : [
-    '--xunit-file=' + join_paths(meson.build_root(), 'bam2fastx-cram-bam2fasta.xml'),
+    '--xunit-file=' + join_paths(meson.project_build_root(), 'bam2fastx-cram-bam2fasta.xml'),
     '--verbose'] +
     files('cram/bam2fasta.t'),
   env : [
@@ -20,7 +20,7 @@ test(
   'bam2fastq cram test',
   bam2fastx_cram_script,
   args : [
-    '--xunit-file=' + join_paths(meson.build_root(), 'bam2fastx-cram-bam2fastq.xml'),
+    '--xunit-file=' + join_paths(meson.project_build_root(), 'bam2fastx-cram-bam2fastq.xml'),
     '--verbose'] +
     files('cram/bam2fastq.t'),
   env : [
