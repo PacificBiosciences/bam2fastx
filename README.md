@@ -1,4 +1,3 @@
-<h1 align="center"><img src="http://www.pacb.com/wp-content/themes/pacific-biosciences/img/pacific-biosciences-logo-mobile.svg"/></h1>
 <h1 align="center">BAM2fastx tools</h1>
 <p align="center">Conversion of PacBio BAM files into gzipped fasta and fastq files, including splitting of barcoded data</p>
 
