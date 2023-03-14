@@ -1,9 +1,0 @@
-.DS_Store
-/build*
-
-# cram
-*.pyc
-
-# Meson WrapDB stuff
-/subprojects/*
-!/subprojects/*.wrap
